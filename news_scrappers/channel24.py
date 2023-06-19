@@ -6,7 +6,9 @@ from general_scraper import NewsScraper
 
 
 class Channel24Scraper(NewsScraper):
+
     counter_article = 0
+
     hash_map_month = {
         'січня': 1,
         'лютого': 2,
@@ -23,11 +25,18 @@ class Channel24Scraper(NewsScraper):
     }
 
 
-    def get_news(self, period: int = 0):
+    def get_news(self, period: int = 0) -> list[dict]:
+        '''
+
+        :param period: number of days that we want to observe.
+        :return: json of news articles
+        '''
 
         self.calculate_lower_bound_day(period)
 
         while True:
+
+            # ------------------------- Scrape with BeautifulSoup ----------------------------
 
             response = requests.get(f'https://24tv.ua/golovni-novini_tag1792/fromnews{self.counter_article}/',
                                     headers=self.headers)
@@ -40,6 +49,7 @@ class Channel24Scraper(NewsScraper):
                 day = int(time[0])
                 month = self.hash_map_month[time[1]]
                 time = datetime.date(2023, month, day)
+
                 if time < self.lower_bound_day:
                     return self.lst_articles
 
@@ -47,6 +57,8 @@ class Channel24Scraper(NewsScraper):
                 link = article.find(class_='full-block-link').get('href')
 
                 self.lst_articles.append(self.create_article_object(time, title, link))
+
+            # ------------------------- Scrape with BeautifulSoup ----------------------------
 
 
             self.counter_article += 14

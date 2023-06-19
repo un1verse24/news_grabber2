@@ -22,11 +22,19 @@ class NewVoiceScraper(NewsScraper):
 
 
     def get_news(self, period: int = 0) -> list[dict]:
+        '''
+
+        :param period: number of days that we want to observe.
+        :return: json of news articles
+        '''
 
         self.calculate_lower_bound_day(period)
-        self.lower_bound_day -= datetime.timedelta(days=1)
+        # self.lower_bound_day -= datetime.timedelta(days=1)
 
         while True:
+
+            # ------------------------- Scrape with BeautifulSoup ----------------------------
+
             response = requests.get(f'https://nv.ua/ukr/allnews.html?page={self.page}')
             soup = BeautifulSoup(response.text, 'html.parser')
             all_articles = soup.find_all(class_='row-result')
@@ -39,13 +47,16 @@ class NewVoiceScraper(NewsScraper):
                     days = time[0]
                     month = time[1][:-1]
                     time = datetime.date(2023, self.hash_map_month[month], int(days))
-                    if self.lower_bound_day < time:
-                        title = article.find(class_='title').text
-                        link = article.find(class_='row-result-body').get('href')
 
-                        self.lst_articles.append(self.create_article_object(time, title, link))
-                    else:
+                    if time < self.lower_bound_day:
                         return self.lst_articles
+
+                    title = article.find(class_='title').text
+                    link = article.find(class_='row-result-body').get('href')
+
+                    self.lst_articles.append(self.create_article_object(time, title, link))
+
+                # ------------------------- Scrape with BeautifulSoup ----------------------------
 
                 else:
                     continue
@@ -56,5 +67,5 @@ class NewVoiceScraper(NewsScraper):
 
 if __name__ == '__main__':
     scraper = NewVoiceScraper()
-    scraper.get_news(0)
+    scraper.get_news()
     print(scraper.lst_articles)

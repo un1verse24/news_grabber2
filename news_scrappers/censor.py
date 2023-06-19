@@ -8,10 +8,17 @@ class CensorScraper(NewsScraper):
     page = 1
 
     def get_news(self, period: int = 0) -> list[dict]:
+        '''
+
+        :param period: number of days that we want to observe.
+        :return: json of news articles
+        '''
 
         self.calculate_lower_bound_day(period)
 
         while True:
+
+            # ------------------------- Scrape with BeautifulSoup ----------------------------
 
             response = requests.get(f'https://censor.net/ua/news/all/page/{self.page}/category/0/interval/5/sortby/date', headers=self.headers)
 
@@ -32,11 +39,14 @@ class CensorScraper(NewsScraper):
 
                 self.lst_articles.append(self.create_article_object(time, title, link))
 
+
+            # ------------------------- Scrape with BeautifulSoup ----------------------------
+
             self.page += 1
 
 
 
 if __name__ == '__main__':
     scraper = CensorScraper()
-    scraper.get_news()
+    scraper.get_news(0)
     print(scraper.lst_articles)
