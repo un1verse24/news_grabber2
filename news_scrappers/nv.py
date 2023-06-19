@@ -1,18 +1,10 @@
 import datetime
 import requests
-from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
+from general_scraper import NewsScraper
 
-today = datetime.date.today()
-
-
-class NewVoiceScraper:
-
-    lst_articles = []
+class NewVoiceScraper(NewsScraper):
     page = 1
-    headers = {
-        'User-Agent': UserAgent().random
-    }
     hash_map_month = {
         'січня': 1,
         'лютого': 2,
@@ -29,9 +21,11 @@ class NewVoiceScraper:
     }
 
 
-    def get_news(self, period: int = 1) -> list[dict]:
+    def get_news(self, period: int = 0) -> list[dict]:
 
-        lower_bounds_day = today - datetime.timedelta(days=period)
+        self.calculate_lower_bound_day(period)
+        self.lower_bound_day -= datetime.timedelta(days=1)
+
         while True:
             response = requests.get(f'https://nv.ua/ukr/allnews.html?page={self.page}')
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -45,15 +39,11 @@ class NewVoiceScraper:
                     days = time[0]
                     month = time[1][:-1]
                     time = datetime.date(2023, self.hash_map_month[month], int(days))
-                    if lower_bounds_day < time:
+                    if self.lower_bound_day < time:
                         title = article.find(class_='title').text
                         link = article.find(class_='row-result-body').get('href')
-                        article_obj = {
-                            'time': time,
-                            'link': link,
-                            'title': title
-                        }
-                        self.lst_articles.append(article_obj)
+
+                        self.lst_articles.append(self.create_article_object(time, title, link))
                     else:
                         return self.lst_articles
 
@@ -66,5 +56,5 @@ class NewVoiceScraper:
 
 if __name__ == '__main__':
     scraper = NewVoiceScraper()
-    scraper.get_news(2)
+    scraper.get_news(0)
     print(scraper.lst_articles)

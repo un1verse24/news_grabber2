@@ -1,17 +1,11 @@
 import datetime
 import requests
-from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
+from general_scraper import NewsScraper
 
 
-today = datetime.date.today()
 
-
-class Channel24Scraper:
-    lst_articles = []
-    headers = {
-        'User-Agent': UserAgent().random
-    }
+class Channel24Scraper(NewsScraper):
     counter_article = 0
     hash_map_month = {
         'січня': 1,
@@ -29,9 +23,9 @@ class Channel24Scraper:
     }
 
 
-    def get_news(self, period: int = 1):
-        lower_bound_day = today - datetime.timedelta(days=period)
+    def get_news(self, period: int = 0):
 
+        self.calculate_lower_bound_day(period)
 
         while True:
 
@@ -40,26 +34,19 @@ class Channel24Scraper:
 
             soup = BeautifulSoup(response.text, 'html.parser')
             all_articles = soup.find(class_='news-list oink').find_all(class_='simple-news-item without-photo')
-            # print(len(all_articles))
 
             for article in all_articles:
                 time = article.find(class_='news-info').find('span').text.split(',')[-1].strip().split()
                 day = int(time[0])
                 month = self.hash_map_month[time[1]]
                 time = datetime.date(2023, month, day)
-                if time < lower_bound_day:
+                if time < self.lower_bound_day:
                     return self.lst_articles
 
                 title = article.find(class_='news-title').text
                 link = article.find(class_='full-block-link').get('href')
 
-                article_obj = {
-                    'time': time,
-                    'link': link,
-                    'title': title
-                }
-
-                self.lst_articles.append(article_obj)
+                self.lst_articles.append(self.create_article_object(time, title, link))
 
 
             self.counter_article += 14
@@ -71,11 +58,7 @@ class Channel24Scraper:
 
 
 
-        # print(all_articles)
-
-
-
 if __name__ == '__main__':
     scraper = Channel24Scraper()
-    scraper.get_news(2)
+    scraper.get_news()
     print(scraper.lst_articles)

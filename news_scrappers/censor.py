@@ -1,21 +1,15 @@
 import datetime
 import requests
-from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
+from general_scraper import NewsScraper
 
-today = datetime.date.today()
 
-
-class CensorScraper:
-    lst_articles = []
-    headers = {
-        'User-Agent': UserAgent().random
-    }
+class CensorScraper(NewsScraper):
     page = 1
 
-    def get_news(self, period: int = 1) -> list[dict]:
+    def get_news(self, period: int = 0) -> list[dict]:
 
-        lower_bound_day = today - datetime.timedelta(days=period)
+        self.calculate_lower_bound_day(period)
 
         while True:
 
@@ -29,19 +23,14 @@ class CensorScraper:
                 time = article.find(class_='g-time').get('datetime').split('T')[0].split('-')
                 year, month, day = int(time[0]), int(time[1]), int(time[2])
                 time = datetime.date(year, month, day)
-                if time < lower_bound_day:
+                if time < self.lower_bound_day:
                     return self.lst_articles
 
                 title = article.find('h2').find(class_='news-list-item__title').text
                 link = article.find('a').get('href')
 
-                article_obj = {
-                    'time': time,
-                    'link': link,
-                    'title': title
-                }
 
-                self.lst_articles.append(article_obj)
+                self.lst_articles.append(self.create_article_object(time, title, link))
 
             self.page += 1
 
@@ -49,5 +38,5 @@ class CensorScraper:
 
 if __name__ == '__main__':
     scraper = CensorScraper()
-    scraper.get_news(2)
+    scraper.get_news()
     print(scraper.lst_articles)
