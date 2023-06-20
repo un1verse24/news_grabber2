@@ -1,7 +1,7 @@
 import datetime
 import requests
 from bs4 import BeautifulSoup
-from general_scraper import NewsScraper
+from news_scrappers.general_scraper import NewsScraper
 
 class NewVoiceScraper(NewsScraper):
     page = 1
