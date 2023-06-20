@@ -57,6 +57,7 @@ class Channel24Scraper(NewsScraper):
                 if time < self.lower_bound_day:
                     return self.lst_articles
 
+                time = time.strftime("%Y:%m:%d")
                 title = article.find(class_='news-title').text
                 link = article.find(class_='full-block-link').get('href')
 

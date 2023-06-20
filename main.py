@@ -1,4 +1,5 @@
 import sys
+import json
 
 
 from news_scrappers.ukrainian_truth_scraper import UkrainianTruthScraper
@@ -56,9 +57,21 @@ def get_all_news() -> list[dict]:
         res.extend(scraper.get_news(period))
 
 
+
+    print(res)
     return res
+
+
+def to_json(lst_articles: list[dict]):
+    with open('news.json', 'w') as file:
+        json.dump(lst_articles, file, ensure_ascii=False)
+
+
+
+
+
 
 
 
 if __name__ ==  '__main__':
-    print(get_all_news())
+    to_json(get_all_news())

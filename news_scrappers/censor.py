@@ -37,6 +37,7 @@ class CensorScraper(NewsScraper):
                 if time < self.lower_bound_day:
                     return self.lst_articles
 
+                time = time.strftime("%Y:%m:%d")
                 title = article.find('h2').find(class_='news-list-item__title').text
                 link = article.find('a').get('href')
 

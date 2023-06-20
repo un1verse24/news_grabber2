@@ -55,6 +55,7 @@ class NewVoiceScraper(NewsScraper):
                     if time < self.lower_bound_day:
                         return self.lst_articles
 
+                    time = time.strftime("%Y:%m:%d")
                     title = article.find(class_='title').text
                     link = article.find(class_='row-result-body').get('href')
 
