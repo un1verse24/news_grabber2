@@ -1,6 +1,7 @@
 import sys
 import json
 import csv
+import sqlite3
 
 
 from news_scrappers.ukrainian_truth_scraper import UkrainianTruthScraper
@@ -77,6 +78,17 @@ def to_csv(lst_articles: list[dict]) -> None:
             writer.writerow([article['time'], article['title'], article['link']])
 
 
+def to_db(lst_articles: list[dict]) -> None:
+    with sqlite3.connect('monk.db') as db:
+        cur = db.cursor()
+        cur.execute('CREATE TABLE news(time, title, link)')
+        for article in lst_articles:
+            cur.execute('INSERT INTO news(time, title, link) VALUES(?, ?, ?)', (article['time'], article['title']
+                                                                                , article['link']))
+
+
+
+
 
 
 
@@ -86,5 +98,6 @@ def to_csv(lst_articles: list[dict]) -> None:
 
 
 if __name__ ==  '__main__':
-    to_csv(get_all_news())
+    to_db(get_all_news())
+    # to_csv(get_all_news())
     # to_json(get_all_news())
