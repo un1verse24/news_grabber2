@@ -1,5 +1,6 @@
 import sys
 import json
+import csv
 
 
 from news_scrappers.ukrainian_truth_scraper import UkrainianTruthScraper
@@ -62,9 +63,20 @@ def get_all_news() -> list[dict]:
     return res
 
 
-def to_json(lst_articles: list[dict]):
+def to_json(lst_articles: list[dict]) -> None:
     with open('news.json', 'w') as file:
         json.dump(lst_articles, file, ensure_ascii=False)
+
+
+
+def to_csv(lst_articles: list[dict]) -> None:
+    with open('news.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(['time', 'title', 'link'])
+        for article in lst_articles:
+            writer.writerow([article['time'], article['title'], article['link']])
+
+
 
 
 
@@ -74,4 +86,5 @@ def to_json(lst_articles: list[dict]):
 
 
 if __name__ ==  '__main__':
-    to_json(get_all_news())
+    to_csv(get_all_news())
+    # to_json(get_all_news())
