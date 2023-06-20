@@ -1,5 +1,6 @@
 import datetime
 from fake_useragent import UserAgent
+from exceptions import NotIntegerError
 
 
 class NewsScraper:
@@ -8,6 +9,12 @@ class NewsScraper:
     }
     lst_articles = []
     today = datetime.date.today()
+
+
+    def validate_period(self, period: int = 0):
+        if type(period) != int:
+            raise NotIntegerError('You need to print an integer!')
+
 
 
     def calculate_lower_bound_day(self, period: int = 0):

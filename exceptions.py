@@ -1,0 +1,2 @@
+class NotIntegerError(ValueError):
+    pass

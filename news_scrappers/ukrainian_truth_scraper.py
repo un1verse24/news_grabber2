@@ -7,14 +7,20 @@ from news_scrappers.general_scraper import NewsScraper
 
 
 
+
 class UkrainianTruthScraper(NewsScraper):
 
     def get_news(self, period: int = 0) -> list[dict]:
+
         '''
 
         :param period: number of days that we want to observe.
         :return: json of news articles
         '''
+
+        self.validate_period(period)
+
+        period = abs(period)
 
         # if period < 1 and type(period) != int:
         #     return list()

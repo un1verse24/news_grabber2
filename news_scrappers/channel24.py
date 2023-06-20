@@ -32,6 +32,10 @@ class Channel24Scraper(NewsScraper):
         :return: json of news articles
         '''
 
+        self.validate_period(period)
+
+        period = abs(period)
+
         self.calculate_lower_bound_day(period)
 
         while True:
