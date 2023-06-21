@@ -2,6 +2,7 @@ import sys
 import json
 import csv
 import sqlite3
+import time
 
 
 from news_scrappers.ukrainian_truth_scraper import UkrainianTruthScraper
@@ -78,13 +79,41 @@ def to_csv(lst_articles: list[dict]) -> None:
             writer.writerow([article['time'], article['title'], article['link']])
 
 
-def to_db(lst_articles: list[dict]) -> None:
+def to_db(article: dict) -> None:
     with sqlite3.connect('monk.db') as db:
         cur = db.cursor()
-        cur.execute('CREATE TABLE news(time, title, link)')
-        for article in lst_articles:
-            cur.execute('INSERT INTO news(time, title, link) VALUES(?, ?, ?)', (article['time'], article['title']
-                                                                                , article['link']))
+        cur.execute('CREATE TABLE IF NOT EXISTS news(time TEXT, title TEXT, link TEXT UNIQUE)')
+        cur.execute('INSERT INTO news(time, title, link) VALUES(?, ?, ?)', (article['time'], article['title']
+                                                                            , article['link']))
+
+
+def get_atribute_from_db(atr: str, table: str) -> list:
+    with sqlite3.connect('monk.db') as db:
+        cur = db.cursor()
+        fetched_atributes_from_db = cur.execute(f'SELECT {atr} FROM {table}').fetchall()
+        db.commit()
+        return fetched_atributes_from_db
+
+
+def radar_non_stop_news() -> None:
+    while True:
+        res = []
+        news_articles = get_all_news()
+        for article in news_articles:
+            with sqlite3.connect('monk.db') as db:
+                cur = db.cursor()
+                if article['link'] in get_atribute_from_db('link', 'news'):
+                    continue
+                else:
+                    res.append(article)
+                    to_db(article)
+
+
+        # print(res)
+        time.sleep(30)
+
+
+
 
 
 
@@ -98,6 +127,9 @@ def to_db(lst_articles: list[dict]) -> None:
 
 
 if __name__ ==  '__main__':
-    to_db(get_all_news())
+
+    radar_non_stop_news()
+
+    # to_db(get_all_news())
     # to_csv(get_all_news())
     # to_json(get_all_news())
